@@ -128,7 +128,7 @@ public class RubberIndicator extends RelativeLayout {
         View rootView = inflate(getContext(), R.layout.rubber_indicator, this);
         mContainer = (LinearLayout) rootView.findViewById(R.id.container);
         mOuterCircle = (CircleView) rootView.findViewById(R.id.outer_circle);
-        
+
         // Apply outer color to outerCircle and background shape
         View containerWrapper = rootView.findViewById(R.id.container_wrapper);
         mOuterCircle.setColor(mOuterCircleColor);
@@ -159,11 +159,69 @@ public class RubberIndicator extends RelativeLayout {
         super.onLayout(changed, l, t, r, b);
 
         // Prevent crash if the count as not been set
-        if(mLargeCircle != null){
+        if (mLargeCircle != null) {
             mOuterCircle.setCenter(mLargeCircle.getCenter());
         }
     }
 
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        //Get size requested and size mode
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+        int width, height;
+
+        height = heightSize;
+
+        //Determine Height
+        if (mLargeCircleRadius * 2 > height) {
+            // if the large circle will be bigger than the height if this view
+            mLargeCircleRadius = (int) (height / 2.5);
+            mSmallCircleRadius = height / 3;
+            mOuterCircleRadius = (int) (height / 1.5);
+
+            int viewsCount = mCircleViews.size();
+            mContainer.removeAllViews();
+            mCircleViews.clear();
+            createViews(viewsCount, mFocusPosition);
+        }
+
+        //Determine Width
+        switch(widthMode){
+            case MeasureSpec.EXACTLY:
+                width = widthSize;
+                break;
+            case MeasureSpec.AT_MOST:
+            case MeasureSpec.UNSPECIFIED:
+            default:
+                // If we are in wrap_content or with specific width
+                // This could be improved
+                width = mSmallCircleRadius * (mCircleViews.size() -2) + mLargeCircleRadius + mOuterCircleRadius*2;
+                break;
+        }
+
+        // Let Android make the call to child views
+        super.onMeasure(MeasureSpec.makeMeasureSpec(width, widthMode), MeasureSpec.makeMeasureSpec(height, heightMode));
+    }
+
+    /**
+     * This method must be called before {@link #setCount(int)}, otherwise the focus position will
+     * be set to the default value - zero.
+     *
+     * @param pos the focus position
+     */
+    public void setFocusPosition(final int pos) {
+        mFocusPosition = pos;
+    }
+
+    /**
+     * Set the number of item whitout taking care of the current focus position which will be set to last position
+     *
+     * @param count the number of item
+     */
     public void setCount(int count) {
         if (mFocusPosition == -1) {
             mFocusPosition = 0;
@@ -172,14 +230,11 @@ public class RubberIndicator extends RelativeLayout {
     }
 
     /**
-     * This method must be called before {@link #setCount(int)}, otherwise the focus position will
-     * be set to the default value - zero.
-     * @param pos the focus position
+     * Set the number of items and the style of the selected item
+     *
+     * @param count    number of total item
+     * @param focusPos the position of the current focused item
      */
-    public void setFocusPosition(final int pos) {
-        mFocusPosition = pos;
-    }
-
     public void setCount(int count, int focusPos) {
         if (count < 2) {
             throw new IllegalArgumentException("count must be greater than 2");
@@ -190,23 +245,15 @@ public class RubberIndicator extends RelativeLayout {
         }
 
         /* Check if the number on indicator has changed since the last setCount to prevent duplicate */
-        if(mCircleViews.size() != count) {
+        if (mCircleViews.size() != count) {
             mContainer.removeAllViews();
             mCircleViews.clear();
 
-            int i = 0;
-            for (; i < focusPos; i++) {
-                addSmallCircle();
-            }
-
-            addLargeCircle();
-
-            for (i = focusPos + 1; i < count; i++) {
-                addSmallCircle();
-            }
+            createViews(count, focusPos);
         }
 
         mFocusPosition = focusPos;
+        requestLayout();
     }
 
     public int getFocusPosition() {
@@ -214,7 +261,7 @@ public class RubberIndicator extends RelativeLayout {
     }
 
     public void moveToLeft() {
-        if (mAnim != null && mAnim.isRunning()){
+        if (mAnim != null && mAnim.isRunning()) {
             mPendingAnimations.add(false);
             return;
         }
@@ -222,7 +269,7 @@ public class RubberIndicator extends RelativeLayout {
     }
 
     public void moveToRight() {
-        if (mAnim != null && mAnim.isRunning()){
+        if (mAnim != null && mAnim.isRunning()) {
             mPendingAnimations.add(true);
             return;
         }
@@ -349,7 +396,8 @@ public class RubberIndicator extends RelativeLayout {
         mAnim.setDuration(500);
         mAnim.addListener(new Animator.AnimatorListener() {
             @Override
-            public void onAnimationStart(Animator animation) { }
+            public void onAnimationStart(Animator animation) {
+            }
 
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -364,19 +412,34 @@ public class RubberIndicator extends RelativeLayout {
                     }
                 }
 
-                if(!mPendingAnimations.isEmpty()){
+                if (!mPendingAnimations.isEmpty()) {
                     move(mPendingAnimations.removeFirst());
                 }
             }
 
             @Override
-            public void onAnimationCancel(Animator animation) { }
+            public void onAnimationCancel(Animator animation) {
+            }
 
             @Override
-            public void onAnimationRepeat(Animator animation) { }
+            public void onAnimationRepeat(Animator animation) {
+            }
         });
 
         mAnim.start();
+    }
+
+    private void createViews(int count, int focusPosition) {
+        int i = 0;
+        for (; i < focusPosition; i++) {
+            addSmallCircle();
+        }
+
+        addLargeCircle();
+
+        for (i = focusPosition + 1; i < count; i++) {
+            addSmallCircle();
+        }
     }
 
     private int dp2px(int dpValue) {
@@ -385,6 +448,7 @@ public class RubberIndicator extends RelativeLayout {
 
     public interface OnMoveListener {
         void onMovedToLeft();
+
         void onMovedToRight();
     }
 }
