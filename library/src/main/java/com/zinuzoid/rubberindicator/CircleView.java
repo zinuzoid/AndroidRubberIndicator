@@ -1,4 +1,4 @@
-package com.liangfeizc;
+package com.zinuzoid.rubberindicator;
 
 import android.content.Context;
 import android.content.res.TypedArray;

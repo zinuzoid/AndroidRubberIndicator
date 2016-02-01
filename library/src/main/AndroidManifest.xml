@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.liangfeizc">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.zinuzoid.rubberindicator">
 
     <application android:allowBackup="true">
 

@@ -1,4 +1,4 @@
-package com.liangfeizc;
+package com.zinuzoid.rubberindicator;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;

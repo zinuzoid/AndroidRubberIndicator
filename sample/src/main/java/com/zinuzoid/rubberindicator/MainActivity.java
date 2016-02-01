@@ -1,4 +1,4 @@
-package com.liangfeizc.rubberindicator;
+package com.zinuzoid.rubberindicator;
 
 import android.os.Bundle;
 import android.support.v4.view.GestureDetectorCompat;
@@ -10,9 +10,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.liangfeizc.RubberIndicator;
 
 public class MainActivity extends AppCompatActivity
         implements RubberIndicator.OnMoveListener {

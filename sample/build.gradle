@@ -5,8 +5,8 @@ android {
     buildToolsVersion "22.0.1"
 
     defaultConfig {
-        applicationId "com.liangfeizc.rubberindicator"
-        minSdkVersion 15
+        applicationId "com.zinuzoid.rubberindicator"
+        minSdkVersion 14
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
